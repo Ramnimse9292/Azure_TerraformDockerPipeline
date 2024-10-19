@@ -1,24 +1,40 @@
 trigger:
-  - main  # Adjust if you are using a different branch
+  branches:
+    include:
+      - main  # Adjust if your main branch has a different name
 
 pool:
-  name: SelfHostedPool
+  name: SelfHostedPool  # Use your self-hosted agent pool name
 
 steps:
-  - script: |
-      curl -LO https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_linux_amd64.zip
-      unzip terraform_1.5.0_linux_amd64.zip
-      sudo mv terraform /usr/local/bin/
-      terraform --version
+  - task: Bash@3
     displayName: 'Install Terraform'
+    inputs:
+      targetType: 'inline'
+      script: |
+        echo "Installing Terraform..."
+        curl -LO https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_linux_amd64.zip
+        unzip terraform_1.5.0_linux_amd64.zip
+        sudo mv terraform /usr/local/bin/
+        terraform --version
 
   - script: |
-      cd terraform
+      echo "Running Terraform Init..."
+      cd terraform  # Navigate to the directory where your Terraform files are
       terraform init
-      terraform apply -auto-approve
-    displayName: 'Run Terraform'
+    displayName: 'Terraform Init'
 
   - script: |
-      chmod +x ../create_docker_image.sh
-      ../create_docker_image.sh
-    displayName: 'Create Docker Image'
+      echo "Running Terraform Apply..."
+      terraform apply -auto-approve
+    displayName: 'Terraform Apply'
+
+  - task: Bash@3
+    displayName: 'Build Docker Image'
+    inputs:
+      targetType: 'inline'
+      script: |
+        echo "Building Docker Image..."
+        cd docker  # Navigate to the directory where your Dockerfile is located
+        docker build -t my-docker-image:latest .
+
