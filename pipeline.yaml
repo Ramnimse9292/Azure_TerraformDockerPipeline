@@ -2,7 +2,7 @@ trigger:
   - main  # Adjust if you are using a different branch
 
 pool:
-  vmImage: 'ubuntu-latest'
+  name: SelfHostedPool
 
 steps:
   - script: |
