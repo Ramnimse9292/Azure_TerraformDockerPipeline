@@ -1,20 +1,19 @@
 terraform {
   required_providers {
-    docker = {
-      source  = "hashicorp/docker"
+    azurerm = {
+      source  = "hashicorp/azurerm"
       version = "~> 2.0"
     }
   }
+
+  required_version = ">= 0.12"
 }
 
-provider "docker" {
-  host = "tcp://docker:2375/"  # This will be used in Azure Pipelines
+provider "azurerm" {
+  features {}
 }
 
-resource "docker_image" "my_image" {
-  name = "my_docker_image:latest"
-
-  build {
-    context = "${path.module}/../"  # Adjust the context to point to the directory with Dockerfile
-  }
+resource "azurerm_resource_group" "example" {
+  name     = "example-resources"
+  location = "West Europe"
 }
