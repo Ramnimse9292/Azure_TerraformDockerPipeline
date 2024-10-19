@@ -4,7 +4,7 @@ trigger:
       - main  # Adjust to your main branch name
 
 pool:
-  name: ram  # Replace with the name of your self-hosted agent pool
+  name: Agent1 # Replace with the name of your self-hosted agent pool
 
 steps:
   - script: |
