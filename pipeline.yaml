@@ -1,0 +1,24 @@
+trigger:
+  - main  # Adjust if you are using a different branch
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - script: |
+      curl -LO https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_linux_amd64.zip
+      unzip terraform_1.5.0_linux_amd64.zip
+      sudo mv terraform /usr/local/bin/
+      terraform --version
+    displayName: 'Install Terraform'
+
+  - script: |
+      cd terraform
+      terraform init
+      terraform apply -auto-approve
+    displayName: 'Run Terraform'
+
+  - script: |
+      chmod +x ../create_docker_image.sh
+      ../create_docker_image.sh
+    displayName: 'Create Docker Image'
