@@ -4,7 +4,7 @@ trigger:
       - main  # Adjust to your main branch name
 
 pool:
-  name: Agent1 # Replace with the name of your self-hosted agent pool
+  name: Agent1  # Replace with the name of your self-hosted agent pool
 
 steps:
   - script: |
@@ -16,6 +16,12 @@ steps:
     displayName: 'Install Terraform'
 
   - script: |
+      echo "Listing Terraform directory contents..."
+      cd terraform  # Change to your Terraform directory
+      ls -la  # List files to verify presence of .tf files
+    displayName: 'List Terraform Directory'
+
+  - script: |
       echo "Initializing Terraform..."
       cd terraform  # Change to your Terraform directory
       terraform init
@@ -23,6 +29,7 @@ steps:
 
   - script: |
       echo "Applying Terraform Configuration..."
+      cd terraform  # Ensure you are in the correct directory
       terraform apply -auto-approve
     displayName: 'Terraform Apply'
 
