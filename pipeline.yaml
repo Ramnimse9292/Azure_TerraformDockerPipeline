@@ -7,13 +7,7 @@ pool:
   name: Agent1  # Replace with the name of your self-hosted agent pool
 
 steps:
-  - script: |
-      echo "Installing Terraform..."
-      curl -LO https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_windows_amd64.zip
-      unzip terraform_1.5.0_windows_amd64.zip
-      move terraform.exe C:\Windows\System32\
-      terraform --version
-    displayName: 'Install Terraform'
+  - checkout: self  # Ensure the repository is checked out
 
   - script: |
       echo "Listing root directory contents..."
@@ -25,6 +19,14 @@ steps:
       cd terraform  # Change to your Terraform directory
       dir  # Use dir for Windows
     displayName: 'List Terraform Directory'
+
+  - script: |
+      echo "Installing Terraform..."
+      curl -LO https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_windows_amd64.zip
+      unzip terraform_1.5.0_windows_amd64.zip
+      move terraform.exe C:\Windows\System32\
+      terraform --version
+    displayName: 'Install Terraform'
 
   - script: |
       echo "Initializing Terraform..."
