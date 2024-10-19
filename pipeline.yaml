@@ -4,21 +4,21 @@ trigger:
       - main  # Adjust to your main branch name
 
 pool:
-  name: Agent1  # Replace with the name of your self-hosted agent pool
+  name: Agent1 # Replace with the name of your self-hosted agent pool
 
 steps:
   - script: |
       echo "Installing Terraform..."
-      curl -LO https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_linux_amd64.zip
-      unzip terraform_1.5.0_linux_amd64.zip
-      sudo mv terraform /usr/local/bin/
+      curl -LO https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_windows_amd64.zip
+      unzip terraform_1.5.0_windows_amd64.zip
+      move terraform.exe C:\Windows\System32\
       terraform --version
     displayName: 'Install Terraform'
 
   - script: |
       echo "Listing Terraform directory contents..."
       cd terraform  # Change to your Terraform directory
-      ls -la  # List files to verify presence of .tf files
+      dir  # Use dir for Windows
     displayName: 'List Terraform Directory'
 
   - script: |
