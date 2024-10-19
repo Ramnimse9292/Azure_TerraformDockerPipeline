@@ -1,11 +1,14 @@
 trigger:
-  - main  
+  branches:
+    include:
+      - main  # Adjust to your branch name
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'ubuntu-latest'  # Use a Microsoft-hosted agent
 
 steps:
   - script: |
+      echo "Installing Terraform..."
       curl -LO https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_linux_amd64.zip
       unzip terraform_1.5.0_linux_amd64.zip
       sudo mv terraform /usr/local/bin/
@@ -13,12 +16,18 @@ steps:
     displayName: 'Install Terraform'
 
   - script: |
-      cd terraform
+      echo "Initializing Terraform..."
+      cd terraform  # Change to your Terraform directory
       terraform init
-      terraform apply -auto-approve
-    displayName: 'Run Terraform'
+    displayName: 'Terraform Init'
 
   - script: |
-      chmod +x ../create_docker_image.sh
-      ../create_docker_image.sh
-    displayName: 'Create Docker Image'
+      echo "Applying Terraform Configuration..."
+      terraform apply -auto-approve
+    displayName: 'Terraform Apply'
+
+  - script: |
+      echo "Building Docker Image..."
+      cd docker  # Change to your Dockerfile directory
+      docker build -t my-docker-image:latest .
+    displayName: 'Build Docker Image'
