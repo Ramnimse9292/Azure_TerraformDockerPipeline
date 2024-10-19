@@ -4,7 +4,7 @@ trigger:
       - main  # Adjust to your main branch name
 
 pool:
-  name: Agent1  # Replace with the name of your self-hosted agent pool
+  name: Agent1 # Replace with the name of your self-hosted agent pool
 
 steps:
   - checkout: self  # Ensure the repository is checked out
@@ -16,8 +16,7 @@ steps:
 
   - script: |
       echo "Listing Terraform directory contents..."
-      cd terraform  # Change to your Terraform directory
-      dir  # Use dir for Windows
+      if exist terraform (cd terraform && dir) else (echo "Terraform directory not found.")
     displayName: 'List Terraform Directory'
 
   - script: |
