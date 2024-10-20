@@ -2,7 +2,7 @@ trigger:
 - main  # Change this to your preferred branch
 
 pool:
-  name: self # Use the name of your self-hosted agent pool
+  name: self  # Use the name of your self-hosted agent pool
 
 variables:
   TF_CLOUD_API_TOKEN: $(TF_CLOUD_API_TOKEN)  # Store this in variable groups
@@ -11,26 +11,24 @@ variables:
 
 steps:
 - script: |
-    echo "Triggering Terraform Cloud run..."
-    curl \
-      --header "Authorization: Bearer $(TF_CLOUD_API_TOKEN)" \
-      --header "Content-Type: application/vnd.api+json" \
-      --request POST \
-      --data '{
-        "data": {
-          "attributes": {
-            "is-destroy": false
-          },
-          "type": "runs",
-          "relationships": {
-            "workspace": {
-              "data": {
-                "type": "workspaces",
-                "id": "$(TF_CLOUD_ORG)/$(WORKSPACE_NAME)"
-              }
+    echo Triggering Terraform Cloud run...
+    setlocal enabledelayedexpansion
+    set "data={
+      \"data\": {
+        \"attributes\": {
+          \"is-destroy\": false
+        },
+        \"type\": \"runs\",
+        \"relationships\": {
+          \"workspace\": {
+            \"data\": {
+              \"type\": \"workspaces\",
+              \"id\": \"!TF_CLOUD_ORG!/!WORKSPACE_NAME!\"
             }
           }
         }
-      }' \
-      https://app.terraform.io/api/v2/runs
+      }
+    }"
+
+    curl --header "Authorization: Bearer !TF_CLOUD_API_TOKEN!" --header "Content-Type: application/vnd.api+json" --request POST --data "!data!" https://app.terraform.io/api/v2/runs
   displayName: 'Trigger Terraform Cloud Run'
