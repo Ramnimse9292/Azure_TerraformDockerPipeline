@@ -5,9 +5,9 @@ pool:
   name: self  # Use the name of your self-hosted agent pool
 
 variables:
-  TF_CLOUD_API_TOKEN: $(TF_CLOUD_API_TOKEN)  # Store this in variable groups
-  WORKSPACE_NAME: $(WORKSPACE_NAME)            # Store this in variable groups
-  TF_CLOUD_ORG: $(TF_CLOUD_ORG)                # Store this in variable groups
+  TF_CLOUD_API_TOKEN: ARQKMRBLwfbVKw.atlasv1.NdLzUuk49HHqHYfIHMfkKl7GiGXbuyyxszGPNPqgfhOTzGADwn859iKcHYlDW1vVSMA
+  WORKSPACE_NAME: Azure_TerraformDockerPipeline
+  TF_CLOUD_ORG: Demo_ME
 
 steps:
 - script: |
