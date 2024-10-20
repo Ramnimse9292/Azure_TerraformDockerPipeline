@@ -1,46 +1,36 @@
 trigger:
-  branches:
-    include:
-      - main  # Adjust to your main branch name
+- main  # Adjust this to your preferred branch
 
 pool:
-  name: Agent1 # Replace with the name of your self-hosted agent pool
+  vmImage: 'ubuntu-latest'
+
+variables:
+  TF_CLOUD_API_TOKEN: $(TF_CLOUD_API_TOKEN)  # From variable group
+  WORKSPACE_NAME: $(WORKSPACE_NAME)            # From variable group
+  TF_CLOUD_ORG: $(TF_CLOUD_ORG)                # From variable group
 
 steps:
-  - checkout: self  # Ensure the repository is checked out
-
-  - script: |
-      echo "Listing root directory contents..."
-      dir C:\agents\_work\1\s  # List files in the root directory
-    displayName: 'List Root Directory'
-
-  - script: |
-      echo "Listing Terraform directory contents..."
-      if exist terraform (cd terraform && dir) else (echo "Terraform directory not found.")
-    displayName: 'List Terraform Directory'  # This step checks for the terraform directory
-
-  - script: |
-      echo "Installing Terraform..."
-      curl -LO https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_windows_amd64.zip
-      unzip terraform_1.5.0_windows_amd64.zip
-      move terraform.exe C:\Windows\System32\
-      terraform --version
-    displayName: 'Install Terraform'
-
-  - script: |
-      echo "Initializing Terraform..."
-      cd terraform  # Change to your Terraform directory
-      terraform init
-    displayName: 'Terraform Init'
-
-  - script: |
-      echo "Applying Terraform Configuration..."
-      cd terraform  # Ensure you are in the correct directory
-      terraform apply -auto-approve
-    displayName: 'Terraform Apply'
-
-  - script: |
-      echo "Building Docker Image..."
-      cd docker  # Change to your Dockerfile directory
-      docker build -t my-docker-image:latest .
-    displayName: 'Build Docker Image'
+- script: |
+    echo "Triggering Terraform Cloud run..."
+    curl \
+      --header "Authorization: Bearer $(TF_CLOUD_API_TOKEN)" \
+      --header "Content-Type: application/vnd.api+json" \
+      --request POST \
+      --data '{
+        "data": {
+          "attributes": {
+            "is-destroy": false
+          },
+          "type": "runs",
+          "relationships": {
+            "workspace": {
+              "data": {
+                "type": "workspaces",
+                "id": "$(TF_CLOUD_ORG)/$(WORKSPACE_NAME)"
+              }
+            }
+          }
+        }
+      }' \
+      https://app.terraform.io/api/v2/runs
+  displayName: 'Trigger Terraform Cloud Run'
