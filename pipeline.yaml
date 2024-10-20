@@ -1,4 +1,4 @@
-ftrigger:
+trigger:
 - main  # Change this to your branch if needed
 
 pool:
