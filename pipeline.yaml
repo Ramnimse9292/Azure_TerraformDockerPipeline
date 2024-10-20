@@ -5,9 +5,9 @@ pool:
   name: self  # Replace with your actual self-hosted agent pool name
 
 variables:
-  TF_CLOUD_API_TOKEN: ARQKMRBLwfbVKw.atlasv1.NdLzUuk49HHqHYfIHMfkKl7GiGXbuyyxszGPNPqgfhOTzGADwn859iKcHYlDW1vVSMA
-  WORKSPACE_NAME: Azure_TerraformDockerPipeline
-  TF_CLOUD_ORG: Demo_ME
+  TF_CLOUD_API_TOKEN: $(TF_CLOUD_API_TOKEN)  # From variable group
+  WORKSPACE_NAME: $(WORKSPACE_NAME)            # From variable group
+  TF_CLOUD_ORG: $(TF_CLOUD_ORG)                # From variable group
 
 stages:
 - stage: TriggerTerraformCloud
@@ -19,46 +19,33 @@ stages:
     steps:
     - checkout: self
 
-    - script: |
-        echo "Triggering Terraform Cloud run..."
-        
-        # Prepare the JSON data for the API request
-        setlocal enabledelayedexpansion
-        set "data={
-          \"data\": {
-            \"attributes\": {
-              \"is-destroy\": false
-            },
-            \"type\": \"runs\",
-            \"relationships\": {
-              \"workspace\": {
-                \"data\": {
-                  \"type\": \"workspaces\",
-                  \"id\": \"$(TF_CLOUD_ORG)/$(WORKSPACE_NAME)\"
+    - powershell: |
+        $data = @{
+          data = @{
+            attributes = @{
+              "is-destroy" = $false
+            }
+            type = "runs"
+            relationships = @{
+              workspace = @{
+                data = @{
+                  type = "workspaces"
+                  id = "$env:TF_CLOUD_ORG/$env:WORKSPACE_NAME"
                 }
               }
             }
           }
-        }"
+        }
 
-        # Make the API request
-        response=$(curl --silent --write-out "HTTPSTATUS:%{http_code}" \
-          --header "Authorization: Bearer $(TF_CLOUD_API_TOKEN)" \
-          --header "Content-Type: application/vnd.api+json" \
-          --request POST \
-          --data "!data!" \
-          https://app.terraform.io/api/v2/runs)
+        $jsonData = $data | ConvertTo-Json -Depth 10
 
-        # Separate the body and the status
-        body=$(echo "$response" | sed 's/HTTPSTATUS:[0-9]*$//')
-        status=$(echo "$response" | grep -o 'HTTPSTATUS:[0-9]*$' | sed 's/HTTPSTATUS://')
+        $response = Invoke-RestMethod -Uri 'https://app.terraform.io/api/v2/runs' `
+            -Method Post `
+            -Headers @{
+              "Authorization" = "Bearer $env:TF_CLOUD_API_TOKEN"
+              "Content-Type" = "application/vnd.api+json"
+            } `
+            -Body $jsonData
 
-        echo "Response Body: $body"
-        echo "Response Status: $status"
-
-        # Check if the request was successful
-        if [ "$status" -ne 200 ]; then
-          echo "Error triggering Terraform Cloud run!"
-          exit 1
-        fi
+        Write-Host "Response: $($response | ConvertTo-Json -Depth 10)"
       displayName: 'Trigger Terraform Cloud Run'
