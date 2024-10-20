@@ -5,9 +5,9 @@ pool:
   name: self  # Replace with your actual self-hosted agent pool name
 
 variables:
-  TF_CLOUD_API_TOKEN: $(TF_CLOUD_API_TOKEN)  # From variable group
-  WORKSPACE_NAME: $(WORKSPACE_NAME)            # From variable group
-  TF_CLOUD_ORG: $(TF_CLOUD_ORG)                # From variable group
+  TF_CLOUD_API_TOKEN: ARQKMRBLwfbVKw.atlasv1.NdLzUuk49HHqHYfIHMfkKl7GiGXbuyyxszGPNPqgfhOTzGADwn859iKcHYlDW1vVSMA
+  WORKSPACE_NAME: Azure_TerraformDockerPipeline
+  TF_CLOUD_ORG: Demo_ME
 
 stages:
 - stage: TriggerTerraformCloud
