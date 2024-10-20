@@ -1,55 +1,45 @@
 trigger:
-- main  # Change this to your branch if needed
+  branches:
+    include:
+      - main  # Change to your desired branch
 
 pool:
-  name: self  # Replace with your actual self-hosted agent pool name
+  name: self  # Replace with your self-hosted agent pool name
 
-variables:
-  TF_CLOUD_API_TOKEN: ARQKMRBLwfbVKw.atlasv1.NdLzUuk49HHqHYfIHMfkKl7GiGXbuyyxszGPNPqgfhOTzGADwn859iKcHYlDW1vVSMA
-  WORKSPACE_NAME: Azure_TerraformDockerPipeline
-  TF_CLOUD_ORG: Demo_ME
+steps:
+  - script: |
+      echo "Installing Terraform..."
+      curl -LO https://releases.hashicorp.com/terraform/$(terraformVersion)/terraform_$(terraformVersion)_linux_amd64.zip
+      unzip terraform_$(terraformVersion)_linux_amd64.zip
+      sudo mv terraform /usr/local/bin/
+      terraform --version
+    displayName: 'Install Terraform'
 
-stages:
-- stage: TriggerTerraformCloud
-  jobs:
-  - job: TriggerRun
-    displayName: 'Trigger Terraform Cloud Run'
-    pool:
-      name: self  # Ensure this is your self-hosted pool
-    steps:
-    - checkout: self
+  - script: |
+      echo "Logging in to Docker..."
+      echo $(DOCKER_PASSWORD) | docker login -u $(DOCKER_USERNAME) --password-stdin
+    displayName: 'Docker Login'
+    env:
+      DOCKER_USERNAME: $(DOCKER_USERNAME)  # Set this as a secret variable in Azure DevOps
+      DOCKER_PASSWORD: $(DOCKER_PASSWORD)  # Set this as a secret variable in Azure DevOps
 
-    - powershell: |
-        # Debugging output to check environment variables
-        Write-Host "TF_CLOUD_ORG: $env:TF_CLOUD_ORG"
-        Write-Host "WORKSPACE_NAME: $env:WORKSPACE_NAME"
+  - script: |
+      echo "Initializing Terraform..."
+      terraform init
 
-        $data = @{
-          data = @{
-            attributes = @{
-              "is-destroy" = $false
-            }
-            type = "runs"
-            relationships = @{
-              workspace = @{
-                data = @{
-                  type = "workspaces"
-                  id = "$env:TF_CLOUD_ORG/$env:WORKSPACE_NAME"
-                }
-              }
-            }
-          }
-        }
+      echo "Planning Terraform..."
+      terraform plan -out=tfplan
 
-        $jsonData = $data | ConvertTo-Json -Depth 10
+      echo "Applying Terraform..."
+      terraform apply -auto-approve tfplan
+    displayName: 'Run Terraform'
 
-        $response = Invoke-RestMethod -Uri 'https://app.terraform.io/api/v2/runs' `
-            -Method Post `
-            -Headers @{
-              "Authorization" = "Bearer $env:TF_CLOUD_API_TOKEN"
-              "Content-Type" = "application/vnd.api+json"
-            } `
-            -Body $jsonData
+  - script: |
+      echo "Building Docker Image..."
+      docker build -t your-image-name:latest .
+    displayName: 'Build Docker Image'
 
-        Write-Host "Response: $($response | ConvertTo-Json -Depth 10)"
-      displayName: 'Trigger Terraform Cloud Run'
+  - script: |
+      echo "Pushing Docker Image to Registry..."
+      docker push your-image-name:latest
+    displayName: 'Push Docker Image'
