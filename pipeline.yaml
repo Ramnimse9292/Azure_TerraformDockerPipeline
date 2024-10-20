@@ -1,13 +1,13 @@
 trigger:
-- main  # Adjust this to your preferred branch
+- main  # Change this to your preferred branch
 
 pool:
-  vmImage: 'ubuntu-latest'
+  name: self # Use the name of your self-hosted agent pool
 
 variables:
-  TF_CLOUD_API_TOKEN: $(TF_CLOUD_API_TOKEN)  # From variable group
-  WORKSPACE_NAME: $(WORKSPACE_NAME)            # From variable group
-  TF_CLOUD_ORG: $(TF_CLOUD_ORG)                # From variable group
+  TF_CLOUD_API_TOKEN: $(TF_CLOUD_API_TOKEN)  # Store this in variable groups
+  WORKSPACE_NAME: $(WORKSPACE_NAME)            # Store this in variable groups
+  TF_CLOUD_ORG: $(TF_CLOUD_ORG)                # Store this in variable groups
 
 steps:
 - script: |
