@@ -15,7 +15,7 @@ stages:
   - job: TriggerRun
     displayName: 'Trigger Terraform Cloud Run'
     pool:
-      name: 'YourSelfHostedAgentPool'  # Ensure this is your self-hosted pool
+      name: self  # Ensure this is your self-hosted pool
     steps:
     - checkout: self
 
